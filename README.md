@@ -34,15 +34,19 @@
 LINE Developers画面に表示される「Your user ID」は LIFF用で別物のため使えない。Webhookイベント経由で取得する：
 
 ```bash
-# プロジェクト直下で受信スクリプトを起動（標準ライブラリのみで動く、:8000で待機）
+# ターミナル1: プロジェクト直下で受信スクリプトを起動（標準ライブラリのみで動く、:8000で待機）
 python -m tools.dump_user_id
 
-# 別ターミナルで ngrok を起動
-ngrok http 8000
+# ターミナル2: 一時的な公開URLを発行する。インストール不要で macOS 標準の ssh だけで動く。
+ssh -R 80:localhost:8000 nokey@localhost.run
+# → "Connect to ... https://xxxxxxxx.lhr.life" のような URL が表示される
+
+# （ngrok派の人は: ngrok http 8000 でもOK）
 ```
 
-Developers Console の「Webhook URL」に `https://<ngrok-id>.ngrok-free.app/webhook` を設定して **Webhookの利用** をON、「応答メッセージ」はOFF推奨。
-その後、自分のLINEから公式アカウントに何でもメッセージを1通送ると、スクリプトのコンソールに `>>> LINE_USER_ID = U....` が表示されるのでメモ。
+Developers Console の「Webhook URL」に上記URL + `/webhook` を設定して **Webhookの利用** をON、「応答メッセージ」はOFF推奨。
+その後、自分のLINEから公式アカウントに何でもメッセージを1通送ると、ターミナル1のコンソールに `>>> LINE_USER_ID = U....` が表示されるのでメモ。
+取得後はトンネルとスクリプトをCtrl-Cで終了してOK。
 
 ### 4. GitHub Secrets 設定
 
