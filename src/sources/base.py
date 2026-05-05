@@ -7,6 +7,14 @@ from selectolax.parser import HTMLParser
 from src.core import http
 from src.core.hash import hash_normalized, normalize
 
+BOILERPLATE_TAGS = ("script", "style", "noscript", "nav", "footer", "header", "iframe")
+
+
+def strip_boilerplate(parser: HTMLParser) -> None:
+    for tag in BOILERPLATE_TAGS:
+        for node in parser.css(tag):
+            node.decompose()
+
 
 @dataclass
 class FetchResult:
@@ -14,7 +22,8 @@ class FetchResult:
     url: str
     label: str
     content_hash: str
-    excerpt: str
+    excerpt: str  # truncated, for display only
+    full_text: str  # full normalized text, for keyword filtering
     fallback_used: bool
 
 
@@ -28,21 +37,20 @@ class Source:
     def fetch(self) -> FetchResult:
         html = http.fetch(self.url)
         text, fallback_used = self._extract(html)
+        normalized = normalize(text)
         return FetchResult(
             key=self.key,
             url=self.url,
             label=self.label,
             content_hash=hash_normalized(text),
-            excerpt=normalize(text)[:600],
+            excerpt=normalized[:600],
+            full_text=normalized,
             fallback_used=fallback_used,
         )
 
     def _extract(self, html: str) -> tuple[str, bool]:
         parser = HTMLParser(html)
-        # Drop script/style/nav/footer/header to remove most boilerplate.
-        for tag in ("script", "style", "noscript", "nav", "footer", "header", "iframe"):
-            for node in parser.css(tag):
-                node.decompose()
+        strip_boilerplate(parser)
         if self.selector:
             nodes = parser.css(self.selector)
             if nodes:

@@ -9,7 +9,7 @@ from pathlib import Path
 from src.core import state as state_mod
 from src.core.http import FetchError
 from src.notifier import line
-from src.sources import norifune, nyuka_now, suntory
+from src.sources import norifune, nyuka_now, rakuten_furusato, suntory
 from src.sources.base import FetchResult, Source
 
 KEYWORDS = ("白州", "山崎", "響", "抽選", "販売", "予約", "受付", "入荷", "再販")
@@ -20,6 +20,7 @@ ALL_SOURCES: list[Source] = [
     *nyuka_now.SOURCES,
     *norifune.SOURCES,
     *suntory.SOURCES,
+    *rakuten_furusato.SOURCES,
 ]
 
 logging.basicConfig(
@@ -70,7 +71,7 @@ def run(state_path: Path, dry_run: bool) -> int:
         prev = state.sources.get(source.key)
         is_new = prev is None
         changed = (not is_new) and prev.hash != result.content_hash
-        keyword_hit = has_keyword(result.excerpt)
+        keyword_hit = has_keyword(result.full_text)
 
         if (is_new or changed) and keyword_hit:
             msg = format_message(result, prev.excerpt if prev else "")

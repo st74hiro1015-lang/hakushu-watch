@@ -7,6 +7,7 @@
 - nyuka-now.com（白州・山崎・響まとめ、在庫・再販まとめ）
 - norifune.com（白州購入情報）
 - suntory.co.jp（白州・山崎・響の商品ページ、白州蒸溜所News）
+- search.rakuten.co.jp（白州・山崎・響の楽天ふるさと納税検索結果）
 
 ## やらないこと
 
