@@ -8,6 +8,7 @@
 - norifune.com（白州購入情報）
 - suntory.co.jp（白州・山崎・響の商品ページ、白州蒸溜所News）
 - search.rakuten.co.jp（白州・山崎・響の楽天ふるさと納税検索結果）
+- takashimaya.co.jp（高崎高島屋トップページ、オンラインストア ウイスキーラウンジ）
 
 ## やらないこと
 

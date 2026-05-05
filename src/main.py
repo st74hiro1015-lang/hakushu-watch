@@ -9,7 +9,13 @@ from pathlib import Path
 from src.core import state as state_mod
 from src.core.http import FetchError
 from src.notifier import line
-from src.sources import norifune, nyuka_now, rakuten_furusato, suntory
+from src.sources import (
+    norifune,
+    nyuka_now,
+    rakuten_furusato,
+    suntory,
+    takashimaya,
+)
 from src.sources.base import FetchResult, Source
 
 KEYWORDS = ("白州", "山崎", "響", "抽選", "販売", "予約", "受付", "入荷", "再販")
@@ -21,6 +27,7 @@ ALL_SOURCES: list[Source] = [
     *norifune.SOURCES,
     *suntory.SOURCES,
     *rakuten_furusato.SOURCES,
+    *takashimaya.SOURCES,
 ]
 
 logging.basicConfig(
