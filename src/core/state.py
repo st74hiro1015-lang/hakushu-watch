@@ -8,14 +8,12 @@ from pydantic import BaseModel, Field
 
 
 class SourceState(BaseModel):
-    hash: str
-    last_seen_iso: str
-    fallback_used: bool = False
-    excerpt: str = ""
+    seen_keys: list[str] = Field(default_factory=list)
+    last_seen_iso: str = ""
 
 
 class State(BaseModel):
-    version: int = 1
+    version: int = 2
     sources: dict[str, SourceState] = Field(default_factory=dict)
 
 
@@ -23,10 +21,13 @@ def load(path: Path) -> State:
     if not path.exists():
         return State()
     try:
-        return State.model_validate_json(path.read_text(encoding="utf-8"))
+        data = json.loads(path.read_text(encoding="utf-8"))
+        # Drop pre-v2 state (different schema): start clean. The first poll is
+        # silent (no spurious "all items new" notifications).
+        if data.get("version") != 2:
+            return State()
+        return State.model_validate(data)
     except Exception:
-        # Corrupted state -> reset rather than crash. First poll will look like
-        # all sources are new (filtered by keyword, so noise is bounded).
         return State()
 
 

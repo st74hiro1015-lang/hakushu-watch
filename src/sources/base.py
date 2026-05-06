@@ -1,11 +1,11 @@
 from __future__ import annotations
 
+import hashlib
 from dataclasses import dataclass
 
 from selectolax.parser import HTMLParser
 
 from src.core import http
-from src.core.hash import hash_normalized, normalize
 
 BOILERPLATE_TAGS = ("script", "style", "noscript", "nav", "footer", "header", "iframe")
 
@@ -16,45 +16,33 @@ def strip_boilerplate(parser: HTMLParser) -> None:
             node.decompose()
 
 
-@dataclass
-class FetchResult:
+@dataclass(frozen=True)
+class Item:
+    """A single notifiable entity (e.g. one store's lottery, one product listing).
+
+    Notifications are sent at item granularity: title + url, nothing else.
+    `key` is the stable identifier we de-dupe on across polls.
+    """
+
     key: str
-    url: str
-    label: str
-    content_hash: str
-    excerpt: str  # truncated, for display only
-    full_text: str  # full normalized text, for keyword filtering
-    fallback_used: bool
+    title: str  # what the user sees (store name or product name)
+    url: str  # link the user clicks
+
+
+def stable_key(*parts: str) -> str:
+    return hashlib.sha1("|".join(parts).encode("utf-8")).hexdigest()[:16]
 
 
 @dataclass
 class Source:
-    key: str
+    """A pollable source. Subclasses implement fetch_items()."""
+
+    source_key: str  # stable id for state file
     url: str
-    label: str
-    selector: str | None  # None = whole-page hash
+    label: str  # human-readable source name (used as fallback prefix in titles)
 
-    def fetch(self) -> FetchResult:
-        html = http.fetch(self.url)
-        text, fallback_used = self._extract(html)
-        normalized = normalize(text)
-        return FetchResult(
-            key=self.key,
-            url=self.url,
-            label=self.label,
-            content_hash=hash_normalized(text),
-            excerpt=normalized[:600],
-            full_text=normalized,
-            fallback_used=fallback_used,
-        )
+    def fetch_items(self) -> list[Item]:
+        raise NotImplementedError
 
-    def _extract(self, html: str) -> tuple[str, bool]:
-        parser = HTMLParser(html)
-        strip_boilerplate(parser)
-        if self.selector:
-            nodes = parser.css(self.selector)
-            if nodes:
-                return " ".join(n.text(separator=" ", strip=True) for n in nodes), False
-        body = parser.body
-        text = body.text(separator=" ", strip=True) if body else parser.text(strip=True)
-        return text, self.selector is not None
+    def _fetch_html(self) -> str:
+        return http.fetch(self.url)

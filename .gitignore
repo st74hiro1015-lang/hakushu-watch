@@ -1,4 +1,5 @@
 .line-credentials.txt
+github-setup.html
 __pycache__/
 *.pyc
 .venv/

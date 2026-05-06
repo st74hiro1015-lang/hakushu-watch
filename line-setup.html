@@ -1,0 +1,408 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>📱 hakushu-watch LINE通知 セットアップマニュアル</title>
+<style>
+  body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;max-width:920px;margin:0 auto;padding:24px;background:#f5f6f8;color:#1a1a1a;line-height:1.7}
+  h1{color:#06c755;border-bottom:3px solid #06c755;padding-bottom:10px;font-size:22px}
+  h2{color:#06c755;margin-top:36px;font-size:20px;border-bottom:2px solid #d4f5dc;padding-bottom:6px}
+  h3{color:#0091ea;margin-top:20px;font-size:16px}
+  .card{background:#fff;border:1px solid #e3e6eb;border-radius:10px;padding:20px;margin:16px 0;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+  .step{background:#e1f5fe;border-left:4px solid #0091ea;padding:14px 18px;margin:14px 0;border-radius:0 6px 6px 0}
+  .step b{color:#0091ea}
+  .warn{background:#fffbeb;border-left:4px solid #f59e0b;padding:14px 18px;margin:14px 0;border-radius:0 6px 6px 0}
+  .warn b{color:#d97706}
+  .danger{background:#fef2f2;border-left:4px solid #dc2626;padding:14px 18px;margin:14px 0;border-radius:0 6px 6px 0}
+  .danger b{color:#dc2626}
+  .success{background:#dcfce7;border-left:4px solid #22c55e;padding:14px 18px;margin:14px 0;border-radius:0 6px 6px 0}
+  .success b{color:#15803d}
+  .btn{display:inline-block;background:#06c755;color:#fff;padding:10px 20px;border-radius:8px;text-decoration:none;font-weight:bold;font-size:14px;margin:6px 2px;cursor:pointer;border:0}
+  .btn:hover{background:#04a045}
+  .btn-copy{background:#0091ea;font-size:12px;padding:6px 12px}
+  .btn-copy:hover{background:#0077b8}
+  .external-btn{display:block;background:#06c755;color:#fff;padding:14px 20px;border-radius:8px;text-decoration:none;font-weight:bold;text-align:center;margin:8px 0;font-size:15px}
+  .external-btn:hover{background:#04a045}
+  pre{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:6px;font-family:Menlo,monospace;font-size:13px;overflow-x:auto;line-height:1.5;margin:8px 0;white-space:pre-wrap;word-break:break-all}
+  .code-block{position:relative}
+  .code-block .btn-copy{position:absolute;top:8px;right:8px}
+  table{width:100%;border-collapse:collapse;margin:12px 0;font-size:14px}
+  table th,table td{padding:10px 12px;border:1px solid #e3e6eb;text-align:left;vertical-align:top}
+  table th{background:#d4f5dc;font-weight:600;color:#15803d}
+  kbd{background:#fbbf24;color:#1e293b;border:1px solid #f59e0b;border-bottom-width:2px;border-radius:4px;padding:3px 8px;font-family:Menlo,monospace;font-size:12px;font-weight:bold;margin:0 2px}
+  .toc{background:#fff;border:2px solid #06c755;border-radius:10px;padding:16px 20px;margin:16px 0}
+  .toc h2{margin-top:0;border:0}
+  .toc a{color:#06c755;text-decoration:none;font-weight:600;display:block;padding:6px 0}
+  .toc a:hover{text-decoration:underline}
+  .phase-header{background:#06c755;color:#fff;padding:14px 20px;border-radius:8px;margin-top:36px;font-weight:bold}
+  .phase-header span{float:right;font-size:13px;opacity:.9}
+  .checkpoint{background:#fff;border:2px dashed #06c755;border-radius:8px;padding:12px 16px;margin:14px 0;font-size:14px;color:#15803d}
+  .checkpoint::before{content:"✓ 確認: ";font-weight:bold}
+  .field{background:#f8f9fb;border:1px solid #e3e6eb;border-radius:6px;padding:12px;margin:10px 0}
+  .field-label{font-weight:bold;color:#06c755;font-size:13px;margin-bottom:4px}
+  .field-content{font-family:Menlo,monospace;font-size:13px;background:#fff;padding:8px;border-radius:4px;border:1px solid #e3e6eb;word-break:break-all}
+  ol{padding-left:24px}
+  ol li{margin:6px 0}
+  .progress{display:flex;gap:6px;margin:12px 0;font-size:11px;flex-wrap:wrap}
+  .progress span{background:#e3e6eb;padding:6px 10px;border-radius:4px;color:#666}
+  .progress span.done{background:#06c755;color:#fff}
+  .terminal{background:#1e293b;color:#e2e8f0;padding:14px;border-radius:6px;font-family:Menlo,monospace;font-size:13px;line-height:1.5;margin:8px 0}
+  .terminal .prompt{color:#22c55e}
+  .terminal .out{color:#94a3b8}
+  .terminal .highlight{background:#fbbf24;color:#1e293b;padding:2px 4px;border-radius:3px;font-weight:bold}
+  .toast{position:fixed;bottom:20px;right:20px;background:#06c755;color:#fff;padding:12px 20px;border-radius:8px;display:none;box-shadow:0 4px 12px rgba(0,0,0,.2);z-index:1000;font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>📱 hakushu-watch LINE通知 セットアップマニュアル</h1>
+
+<div class="card" style="background:#06c755;color:#fff;border:0">
+  <h2 style="color:#fff;border:0;margin-top:0">⚡ 全6フェーズ・所要時間 約20分</h2>
+  <p style="margin:0;font-size:14px;opacity:.95">LINE Messaging API でiPhoneのLINEに通知を飛ばすための設定を、上から順にやれば完了します。</p>
+</div>
+
+<div class="toc">
+  <h2>📑 目次</h2>
+  <a href="#phase1">▶︎ Phase 1 — Provider と Channel 作成（5分）</a>
+  <a href="#phase2">▶︎ Phase 2 — 長期チャネルアクセストークン発行（2分）</a>
+  <a href="#phase3">▶︎ Phase 3 — bot を友だち追加（1分）</a>
+  <a href="#phase4">▶︎ Phase 4 — User ID 取得（10分・最難関）</a>
+  <a href="#phase5">▶︎ Phase 5 — GitHub Secrets 登録（3分）</a>
+  <a href="#phase6">▶︎ Phase 6 — 動作確認（1分）</a>
+  <a href="#trouble">▶︎ トラブルシューティング</a>
+</div>
+
+<div class="card">
+  <h3 style="margin-top:0">📝 取得する2つの値（最後にGitHubに登録）</h3>
+  <div class="field">
+    <div class="field-label">① LINE_CHANNEL_ACCESS_TOKEN</div>
+    <div class="field-content">Phase 2 で取得する 200文字以上の長い文字列</div>
+  </div>
+  <div class="field">
+    <div class="field-label">② LINE_USER_ID</div>
+    <div class="field-content">Phase 4 で取得する U で始まる33文字の文字列</div>
+  </div>
+  <div class="warn">
+    <b>準備</b>: VS Code でメモファイルを開いておき、取得した値はその場で貼り付けて保管してください。後で再表示できないため。
+  </div>
+</div>
+
+<!-- ============ PHASE 1 ============ -->
+<div class="phase-header" id="phase1">Phase 1 — Provider と Channel 作成 <span>所要 5分</span></div>
+<div class="progress">
+  <span class="done">1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+</div>
+
+<div class="card">
+  <h3>1-1. LINE Developers Console を開く</h3>
+  <a class="external-btn" href="https://developers.line.biz/console/" target="_blank" rel="noopener">🔗 LINE Developers Console を開く</a>
+  <div class="danger">
+    <b>サイトを間違えやすい注意</b>: 開く先は <code>developers.line.biz</code>（開発者向け）です。
+    <code>manager.line.biz</code>（LINE Official Account Manager）は別サイトで、ここではProvider/Channelの設定はできません。URLバーを必ず確認してください。
+  </div>
+  <div class="step">
+    LINEアカウントでログイン（iPhoneのLINEと同じアカウント）。初回はSMS認証が来ます。
+  </div>
+  <div class="success">
+    <b>すでにLINE公式アカウント（@xxxxxxx）を作成済みの場合</b>: Providerは自動で作られているケースが多いです。Developers Console を開いた時点で左に Provider 一覧が出ていれば、Phase 1-2 はスキップして 1-3 の「<b>既存のProviderをクリック</b>」 → 中にあるMessaging API channelを開く → <b>Phase 2へ進む</b>でOK。
+  </div>
+
+  <h3>1-2. Provider を作成</h3>
+  <ol>
+    <li>「<b>Create</b>」または「<b>新規プロバイダー作成</b>」をクリック</li>
+    <li>Provider名を入力（個人名でOK・後から変更可・外部に出ない）</li>
+    <li>「<b>Create</b>」を押下</li>
+  </ol>
+
+  <h3>1-3. Messaging API channel を作成</h3>
+  <ol>
+    <li>作ったProviderをクリック</li>
+    <li>「<b>Create a Messaging API channel</b>」をクリック</li>
+    <li>下表の通り入力</li>
+  </ol>
+  <table>
+    <tr><th>項目</th><th>入力内容</th></tr>
+    <tr><td>Channel type</td><td>Messaging API（自動）</td></tr>
+    <tr><td>Provider</td><td>1-2で作ったProvider名（自動）</td></tr>
+    <tr><td>Channel icon</td><td>任意（空欄でOK）</td></tr>
+    <tr><td>Channel name</td><td><code>hakushu-watch</code> など</td></tr>
+    <tr><td>Channel description</td><td>白州ウイスキー抽選通知</td></tr>
+    <tr><td>Category</td><td>個人(個人事業主)</td></tr>
+    <tr><td>Subcategory</td><td>その他</td></tr>
+    <tr><td>Email</td><td>自分のメールアドレス</td></tr>
+    <tr><td>利用規約</td><td>全部チェック</td></tr>
+  </table>
+  <p>「<b>Create</b>」を押すと作成完了。</p>
+  <div class="checkpoint">チャネル一覧画面に <code>hakushu-watch</code> が表示されている</div>
+</div>
+
+<!-- ============ PHASE 2 ============ -->
+<div class="phase-header" id="phase2">Phase 2 — 長期チャネルアクセストークン発行 <span>所要 2分</span></div>
+<div class="progress">
+  <span class="done">1</span><span class="done">2</span><span>3</span><span>4</span><span>5</span><span>6</span>
+</div>
+
+<div class="card">
+  <div class="danger">
+    <b>最重要の落とし穴</b>: デフォルトで発行されるトークンは <b>短期（1ヶ月で失効）</b>。長期トークンに切り替えないと1ヶ月後に通知が止まります。
+  </div>
+
+  <h3>2-1. Messaging API設定タブを開く</h3>
+  <p>作ったチャネル画面の上部タブで「<b>Messaging API設定</b>」をクリック。</p>
+
+  <h3>2-2. 長期トークン発行</h3>
+  <ol>
+    <li>ページを下にスクロール</li>
+    <li>「<b>チャネルアクセストークン（長期）</b>」セクションを探す</li>
+    <li>「<b>発行</b>」ボタンを押下</li>
+    <li>表示された長い文字列を <b>今すぐコピー</b> してメモファイルに保存</li>
+  </ol>
+  <div class="danger">
+    <b>注意</b>: この画面を閉じると再表示できません。コピーし忘れたら再発行が必要。
+  </div>
+
+  <h3>2-3. 自動応答を無効化</h3>
+  <p>同じ画面の下部「応答設定」セクションで以下を <b>OFF</b> にする：</p>
+  <ul>
+    <li>応答メッセージ → <b>OFF</b></li>
+    <li>あいさつメッセージ → <b>OFF</b></li>
+  </ul>
+  <div class="warn">
+    これをやらないとbotがテンプレ応答を返してきて鬱陶しいうえ、Phase 4のWebhook検証が不安定になります。
+  </div>
+  <div class="checkpoint">200文字以上の長いトークンをメモファイルに保存済み</div>
+</div>
+
+<!-- ============ PHASE 3 ============ -->
+<div class="phase-header" id="phase3">Phase 3 — bot を友だち追加 <span>所要 1分</span></div>
+<div class="progress">
+  <span class="done">1</span><span class="done">2</span><span class="done">3</span><span>4</span><span>5</span><span>6</span>
+</div>
+
+<div class="card">
+  <h3>3-1. QRコードを表示</h3>
+  <p>「<b>Messaging API設定</b>」タブの上部にある <b>QRコード</b> を画面に表示しておく。</p>
+
+  <h3>3-2. iPhoneのLINEで読み取り</h3>
+  <ol>
+    <li>iPhoneのLINEを開く</li>
+    <li>「<b>ホーム</b>」タブ</li>
+    <li>右上の「<b>+</b>」アイコン</li>
+    <li>「<b>QRコードリーダー</b>」</li>
+    <li>QRコードを読み取る</li>
+    <li>「<b>追加</b>」ボタン</li>
+  </ol>
+  <div class="checkpoint">iPhoneの友だちリストに bot が追加されている</div>
+</div>
+
+<!-- ============ PHASE 4 ============ -->
+<div class="phase-header" id="phase4">Phase 4 — User ID 取得 <span>所要 10分・最難関</span></div>
+<div class="progress">
+  <span class="done">1</span><span class="done">2</span><span class="done">3</span><span class="done">4</span><span>5</span><span>6</span>
+</div>
+
+<div class="card">
+  <div class="warn">
+    <b>注意</b>: LINE Developers画面に表示される「<b>Your user ID</b>」はLIFF用で<b>別物</b>。実際の通知先IDは、bot にメッセージを送ってwebhook経由で取る必要があります。
+  </div>
+
+  <h3>4-1. ターミナル1: 受信スクリプトを起動</h3>
+  <p>VS Code で <kbd>Cmd</kbd>+<kbd>J</kbd> でターミナルを開き、以下を実行：</p>
+  <div class="code-block">
+    <pre id="cmd1">cd hakushu-watch
+.venv/bin/python -m tools.dump_user_id</pre>
+    <button class="btn btn-copy" onclick="copyText('cmd1')">📋 コピー</button>
+  </div>
+  <p>出力例：</p>
+  <div class="terminal">
+<span class="out">listening on http://0.0.0.0:8000 — point your LINE webhook here via ngrok</span>
+  </div>
+  <div class="warn"><b>このターミナルは閉じない</b>。次のステップ用に開きっぱなしにしておく。</div>
+
+  <h3>4-2. ターミナル2: 公開URLを発行</h3>
+  <p>VS Code 右上の「<b>+</b>」でターミナルをもう1つ開く（または <kbd>Cmd</kbd>+<kbd>Shift</kbd>+<kbd>P</kbd> → <code>Terminal: Create New Terminal</code>）：</p>
+  <div class="code-block">
+    <pre id="cmd2">ssh -R 80:localhost:8000 nokey@localhost.run</pre>
+    <button class="btn btn-copy" onclick="copyText('cmd2')">📋 コピー</button>
+  </div>
+  <p>初回のみ「continue connecting? (yes/no)」と聞かれるので <code>yes</code>。接続後こんな表示：</p>
+  <div class="terminal">
+<span class="out">===============================================================================
+Welcome to localhost.run!
+...
+** your connection id is xxxxxxxx... **
+
+</span><span class="highlight">xxxxxxxx.lhr.life tunneled with tls termination, https://xxxxxxxx.lhr.life</span>
+  </div>
+  <p>この <code>https://xxxxxxxx.lhr.life</code> の URL をコピー。<b>このターミナルも閉じない</b>。</p>
+
+  <h3>4-3. LINE Developers で Webhook URL を設定</h3>
+  <p>ブラウザの「<b>Messaging API設定</b>」タブに戻って：</p>
+  <ol>
+    <li>「<b>Webhook URL</b>」欄に <code>https://xxxxxxxx.lhr.life/webhook</code> を入力<br>
+        <div class="danger" style="margin:6px 0"><b>末尾の <code>/webhook</code> を必ず付ける</b></div></li>
+    <li>「<b>更新</b>」ボタン</li>
+    <li>「<b>検証</b>」ボタン → 「<b>成功</b>」と出ればOK</li>
+    <li>「<b>Webhookの利用</b>」を <b>ON</b></li>
+  </ol>
+
+  <div class="warn"><b>「成功」が出ない場合</b>:
+    <ul style="margin:8px 0">
+      <li>ターミナル1のスクリプトが動いているか</li>
+      <li>ターミナル2のssh接続が切れていないか</li>
+      <li>URL末尾 <code>/webhook</code> 付け忘れていないか</li>
+    </ul>
+  </div>
+
+  <h3>4-4. iPhoneから bot にメッセージ送信</h3>
+  <p>iPhoneのLINEで、Phase 3で追加したbotとのトーク画面を開き、何でもいいので1通送る（例: <code>test</code>）。</p>
+
+  <h3>4-5. User ID をコピー</h3>
+  <p>ターミナル1（受信スクリプト側）にこんな行が出る：</p>
+  <div class="terminal">
+<span class="highlight">>>> LINE_USER_ID = U1234567890abcdef1234567890abcdef</span>
+  </div>
+  <p><code>U</code>で始まる33文字をコピーしてメモファイルに保存。</p>
+
+  <h3>4-6. 後始末</h3>
+  <ol>
+    <li>ターミナル1, 2を <kbd>Ctrl</kbd>+<kbd>C</kbd> で停止</li>
+    <li>LINE Developers の「Webhookの利用」は <b>OFF に戻してOK</b>（botは送信しかしないため）</li>
+  </ol>
+  <div class="checkpoint">メモファイルに ① 長期トークン と ② U で始まる33文字 の両方が揃っている</div>
+</div>
+
+<!-- ============ PHASE 5 ============ -->
+<div class="phase-header" id="phase5">Phase 5 — GitHub Secrets 登録 <span>所要 3分</span></div>
+<div class="progress">
+  <span class="done">1</span><span class="done">2</span><span class="done">3</span><span class="done">4</span><span class="done">5</span><span>6</span>
+</div>
+
+<div class="card">
+  <h3>5-1. リポジトリ作成</h3>
+  <a class="external-btn" href="https://github.com/new" target="_blank" rel="noopener">🔗 GitHub: 新規リポジトリ作成</a>
+  <ul>
+    <li>Repository name: <code>hakushu-watch</code></li>
+    <li>Visibility: <b>Public</b>（Actionsの無料枠のため必須）</li>
+    <li>README/.gitignore のチェックは <b>外す</b>（既存ファイルがあるため）</li>
+    <li>「Create repository」</li>
+  </ul>
+
+  <h3>5-2. ローカルから push</h3>
+  <p>VS Code のターミナルで（<code>&lt;あなたのID&gt;</code>を自分のGitHubユーザー名に置換）：</p>
+  <div class="code-block">
+    <pre id="cmd3">cd hakushu-watch
+git remote add origin https://github.com/&lt;あなたのID&gt;/hakushu-watch.git
+git push -u origin main</pre>
+    <button class="btn btn-copy" onclick="copyText('cmd3')">📋 コピー</button>
+  </div>
+  <div class="warn">
+    push時にユーザー名・PAT（Personal Access Token）を求められる場合あり。
+    GitHubの <a href="https://github.com/settings/tokens" target="_blank" rel="noopener">Settings → Developer settings → Personal access tokens</a> で <code>repo</code> 権限のトークンを発行して使用。
+  </div>
+
+  <h3>5-3. Secrets を登録</h3>
+  <p>GitHubのリポジトリページで：</p>
+  <ol>
+    <li>「<b>Settings</b>」タブ</li>
+    <li>左メニュー「<b>Secrets and variables</b>」 → 「<b>Actions</b>」</li>
+    <li>「<b>New repository secret</b>」ボタン</li>
+    <li>下表の2件を1つずつ追加（それぞれ「Add secret」で保存）</li>
+  </ol>
+  <table>
+    <tr><th>Name</th><th>Secret欄に貼る値</th></tr>
+    <tr><td><code>LINE_CHANNEL_ACCESS_TOKEN</code></td><td>Phase 2-2 で取った長いトークン</td></tr>
+    <tr><td><code>LINE_USER_ID</code></td><td>Phase 4-5 で取った <code>U....</code></td></tr>
+  </table>
+  <div class="checkpoint">Secrets画面に上記2件が表示されている</div>
+</div>
+
+<!-- ============ PHASE 6 ============ -->
+<div class="phase-header" id="phase6">Phase 6 — 動作確認 <span>所要 1分</span></div>
+<div class="progress">
+  <span class="done">1</span><span class="done">2</span><span class="done">3</span><span class="done">4</span><span class="done">5</span><span class="done">6</span>
+</div>
+
+<div class="card">
+  <h3>6-1. workflow を手動実行</h3>
+  <p>GitHubリポジトリの「<b>Actions</b>」タブで：</p>
+  <ol>
+    <li>左メニューから「<b>poll</b>」を選択</li>
+    <li>右側の「<b>Run workflow</b>」ボタン</li>
+    <li>ブランチ <code>main</code> を選んで「<b>Run workflow</b>」</li>
+    <li>30秒〜1分待つと実行が始まる</li>
+  </ol>
+
+  <h3>6-2. 成功確認</h3>
+  <ul>
+    <li>ジョブが <b>緑色（✓）</b> になればOK</li>
+    <li>ログを開いて <code>notifications=15 failures=0</code> のような行を確認</li>
+  </ul>
+
+  <h3>6-3. iPhoneのLINEに通知が来る</h3>
+  <div class="success">
+    <b>初回は登録対象15件分の通知が一気に届きます</b>（更新検知メッセージとして）。
+    届けば <b>セットアップ完了</b>です。
+  </div>
+  <p>以降、15分毎にcronが自動で回り、新しい抽選告知が出るとLINEへPush通知が届きます。</p>
+</div>
+
+<!-- ============ TROUBLE ============ -->
+<h2 id="trouble">⚠️ トラブルシューティング</h2>
+<div class="card">
+  <table>
+    <tr><th>症状</th><th>原因と対処</th></tr>
+    <tr>
+      <td>Phase 4の「検証」で失敗</td>
+      <td>ssh接続が切れている → ターミナル2を再接続→<b>新しいURL</b>でLINE側更新</td>
+    </tr>
+    <tr>
+      <td>User IDが <code>>>></code> で表示されない</td>
+      <td>「Webhookの利用」がOFF / 「応答メッセージ」がON / URL末尾<code>/webhook</code>忘れ</td>
+    </tr>
+    <tr>
+      <td>GitHub Actionsで <code>LINE push failed: 401</code></td>
+      <td>TokenがTYPO / 短期トークンを使った（1ヶ月超でexpired） → 長期トークンを再発行してSecret更新</td>
+    </tr>
+    <tr>
+      <td>GitHub Actionsで <code>LINE push failed: 400 Invalid user</code></td>
+      <td>User IDのコピペミス（必ず<code>U</code>で始まる33文字）</td>
+    </tr>
+    <tr>
+      <td>workflow が走るのに通知が来ない</td>
+      <td>「自動応答メッセージ」がONだとPushが詰まることあり → OFFに戻す</td>
+    </tr>
+    <tr>
+      <td><code>git push</code> で「support for password authentication was removed」</td>
+      <td>パスワードでなくPATが必要。<a href="https://github.com/settings/tokens" target="_blank" rel="noopener">Settings → Developer settings → Personal access tokens</a> で発行</td>
+    </tr>
+    <tr>
+      <td><code>ssh -R</code> 接続が頻繁に切れる</td>
+      <td>localhost.run のセッションは数時間で切れる仕様。User ID取得用の一時利用なのでOK</td>
+    </tr>
+  </table>
+</div>
+
+<div class="card" style="background:#06c755;color:#fff;border:0;text-align:center">
+  <h2 style="color:#fff;border:0;margin-top:0">🎉 完了!</h2>
+  <p style="margin:0;font-size:14px">これで白州・山崎・響の抽選告知が出るたびにLINEに通知が届きます。</p>
+</div>
+
+<div class="toast" id="toast">📋 コピーしました</div>
+
+<script>
+function copyText(id) {
+  const el = document.getElementById(id);
+  const text = el.innerText.replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+  navigator.clipboard.writeText(text).then(() => {
+    const toast = document.getElementById('toast');
+    toast.style.display = 'block';
+    setTimeout(() => { toast.style.display = 'none'; }, 1500);
+  });
+}
+</script>
+
+</body>
+</html>

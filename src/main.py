@@ -16,11 +16,11 @@ from src.sources import (
     suntory,
     takashimaya,
 )
-from src.sources.base import FetchResult, Source
+from src.sources.base import Item, Source
 
-KEYWORDS = ("白州", "山崎", "響", "抽選", "販売", "予約", "受付", "入荷", "再販")
 DEFAULT_STATE_PATH = Path("state/state.json")
 SOURCE_INTERVAL_SEC = 2.0
+MAX_NEW_ITEMS_PER_SOURCE = 30  # safety cap; if more, treat as broken & skip
 
 ALL_SOURCES: list[Source] = [
     *nyuka_now.SOURCES,
@@ -37,22 +37,10 @@ logging.basicConfig(
 log = logging.getLogger("hakushu-watch")
 
 
-def has_keyword(text: str) -> bool:
-    return any(kw in text for kw in KEYWORDS)
-
-
-def format_message(result: FetchResult, prev_excerpt: str) -> str:
-    header = f"[更新検知] {result.label}"
-    if result.fallback_used:
-        header += "\n[警告] セレクタ要更新（fallback使用中）"
-    return (
-        f"{header}\n"
-        f"{result.url}\n"
-        f"---\n"
-        f"[新しい本文抜粋]\n{result.excerpt}\n"
-        f"---\n"
-        f"[前回抜粋]\n{prev_excerpt[:300] or '(初回)'}"
-    )
+def format_message(item: Item, source_label: str) -> str:
+    # Strict format the user asked for: store/title + URL only.
+    # Source label appears as a tiny suffix so user knows which feed surfaced it.
+    return f"{item.title}\n{item.url}\n— {source_label}"
 
 
 def run(state_path: Path, dry_run: bool) -> int:
@@ -63,46 +51,60 @@ def run(state_path: Path, dry_run: bool) -> int:
     for i, source in enumerate(ALL_SOURCES):
         if i > 0:
             time.sleep(SOURCE_INTERVAL_SEC)
-        log.info("fetch %s (%s)", source.key, source.url)
+        log.info("fetch %s", source.source_key)
         try:
-            result = source.fetch()
+            items = source.fetch_items()
         except FetchError as e:
-            log.warning("fetch failed: %s -> %s", source.key, e)
+            log.warning("fetch failed: %s -> %s", source.source_key, e)
             failures += 1
             continue
         except Exception as e:  # noqa: BLE001 - one source failure must not stop the run
-            log.exception("unexpected error on %s: %s", source.key, e)
+            log.exception("unexpected error on %s: %s", source.source_key, e)
             failures += 1
             continue
 
-        prev = state.sources.get(source.key)
-        is_new = prev is None
-        changed = (not is_new) and prev.hash != result.content_hash
-        keyword_hit = has_keyword(result.full_text)
+        prev = state.sources.get(source.source_key)
+        is_first_run = prev is None or not prev.seen_keys
+        seen = set(prev.seen_keys) if prev else set()
+        new_items = [it for it in items if it.key not in seen]
 
-        if (is_new or changed) and keyword_hit:
-            msg = format_message(result, prev.excerpt if prev else "")
-            log.info("notify %s (new=%s changed=%s)", source.key, is_new, changed)
-            if dry_run:
-                print("[DRY-RUN MESSAGE]")
-                print(msg)
-                print()
+        if is_first_run:
+            log.info(
+                "first run for %s: initializing %d items (no notifications)",
+                source.source_key,
+                len(items),
+            )
+        elif len(new_items) > MAX_NEW_ITEMS_PER_SOURCE:
+            log.warning(
+                "%s reports %d new items (>%d) -- likely a parser/site change. "
+                "Skipping notifications, refreshing state.",
+                source.source_key,
+                len(new_items),
+                MAX_NEW_ITEMS_PER_SOURCE,
+            )
+        else:
+            for item in new_items:
+                msg = format_message(item, source.label)
+                log.info("notify %s: %s", source.source_key, item.title[:60])
+                if dry_run:
+                    print("[DRY-RUN]")
+                    print(msg)
+                    print()
+                else:
+                    try:
+                        line.push(msg)
+                        notifications_sent += 1
+                    except Exception as e:  # noqa: BLE001
+                        log.exception("LINE push failed for %s: %s", source.source_key, e)
+                        # Don't update state for this source so we retry next run.
+                        break
             else:
-                try:
-                    line.push(msg)
-                    notifications_sent += 1
-                except Exception as e:  # noqa: BLE001
-                    log.exception("LINE push failed for %s: %s", source.key, e)
-                    # Keep state unchanged so we retry next run.
-                    continue
-        elif (is_new or changed) and not keyword_hit:
-            log.info("change without keyword match, suppressing: %s", source.key)
+                pass  # else clause runs if for didn't break -- nothing extra to do
 
-        state.sources[source.key] = state_mod.SourceState(
-            hash=result.content_hash,
+        # Update state with current item set
+        state.sources[source.source_key] = state_mod.SourceState(
+            seen_keys=sorted({it.key for it in items}),
             last_seen_iso=state_mod.now_iso(),
-            fallback_used=result.fallback_used,
-            excerpt=result.excerpt,
         )
 
     state_mod.save(state_path, state)
@@ -118,12 +120,7 @@ def run(state_path: Path, dry_run: bool) -> int:
 def parse_args(argv: list[str]) -> argparse.Namespace:
     p = argparse.ArgumentParser(prog="hakushu-watch")
     p.add_argument("--dry-run", action="store_true", help="Skip LINE push, print to stdout")
-    p.add_argument(
-        "--state",
-        type=Path,
-        default=DEFAULT_STATE_PATH,
-        help="Path to state.json",
-    )
+    p.add_argument("--state", type=Path, default=DEFAULT_STATE_PATH)
     return p.parse_args(argv)
 
 
