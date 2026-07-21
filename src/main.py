@@ -12,7 +12,6 @@ from src.notifier import line
 from src.sources import (
     norifune,
     nyuka_now,
-    rakuten_furusato,
     suntory,
     takashimaya,
 )
@@ -26,7 +25,6 @@ ALL_SOURCES: list[Source] = [
     *nyuka_now.SOURCES,
     *norifune.SOURCES,
     *suntory.SOURCES,
-    *rakuten_furusato.SOURCES,
     *takashimaya.SOURCES,
 ]
 
